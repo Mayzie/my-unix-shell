@@ -1,0 +1,59 @@
+MYSHELL(1)
+
+NAME
+	MyShell - simple UNIX shell
+
+AUTHOR
+	Daniel Collis, 430133523
+	
+SYNOPSIS
+	*myshell* [batch_file]
+	
+DESCRIPTION
+	*myshell* is a simple little UNIX shell with basic support for I/O redirection and command execution.
+	
+	It was created as a requirement for the COMP3520 (Operating Systems Internals) course at the University of Sydney.
+	
+ARGUMENTS
+	*myshell* supports zero, or one argument. If no argument is provided, it will launch into an interactive shell. If an argument is provided, it is assumed that it is a file and will attempt to read and execute each individual command (separated by a newline) within it. If the file does not exist, or it is unable to be read, it will launch into an interactive shell. Any more arguments are not looked at and are ignored.
+	
+INVOCATION
+	An _interactive_ shell is one started without any arguments, or with an argument to a file that does not exist on the filesystem. An _interactive_ shell is one that can accepts commands entered in by the user via a hardware keyboard, the _ENTER_ key is then pressed and the shell will attempt to interpret and act upon the entered command. If you're in an interactive shell, and you execute a program that you want to stop prematurely, you can enter the _^C_ key (_CTRL+C_ key combination) to forcefully terminate it.
+	
+	When *myshell* is started non-interactively (i.e. via a shell script specified as the first argument), then *myshell* will attempt to interpret and act upon each line of that file. A command is assumed to be one line, and thus multiple commands are separated by the newline character.
+	
+COMMANDS
+	The following is a list of commands which are supported and executed internally by *myshell*. Arguments surrounded by square brackets ([]) are optional.
+	
+	- cd [<directory>]		If <directory> was specified, then attempt to change the programs current working directory to <directory> and update the PWD environment variable accordingly. If <directory> does not exist, or is a file, then will return an appropriate error message. If no <directory> argument was supplied, then it will print the programs' current working directory, if _stdout_ is not set to any file.
+	- clr				Will clear the terminal screen.
+	- dir [<directory> ...]		Supports multiple arguments. If no arguments were provided, then it will print the contents of the current working directory. If arguments were provided, then it will print the contents of each of those directories. This command is analogous to '*ls -al <arguments ...>'. This command supports redirecting its output to a file.
+	- environ			Will display all environment variables as key-value pairs from the current environment. This command supports redirecting its output to a file.
+	- echo [<arguments> ...]	Supports multiple arguments. Will print whatever are its arguments to the terminal/screen. If no arguments are supplied, then an empty line is produced.
+	- help				Displays this help text. This command supports redirecting its output to a file.
+	- pause				Pauses the shell and blocks all input from appearing on the terminal/screen. When the _ENTER_ key is pressed, then it will stop blocking the shell.
+	- quit				Exits the program.
+	
+I/O REDIRECTION
+	Both the standard input (_stdin_) and standard output (_stdout_) streams can be changed to refer to files that exist on the hard drive.
+	
+	When executing a program within the shell, the input a program receives comes from the _stdin_ stream. By default, this would be your keyboard and what you type into *myshell* with it. If you don't feel like typing everything as input to a program, you can instead make the program read from a specified file by changing where the _stdin_ stream points to (i.e. rather than point to your keyboard, it will point to the file). Assume the program you want to execute/run is called *newprog*, and you want it to get its commands and input from the file *input*, then in order to redirect _stdin_ to point to *input* for this command, you would type the following into your shell and execute it:
+		*newprog* < *input*
+	Take note of the _<_ character, this means to change _stdin_ to whatever argument follows it.
+	
+	Similarly, _stdout_ (standard output) is what the program returns or prints out to the screen. By default, _stdin_ points to the terminal window. If you don't want to see the output of a program, or don't care for it, then in a similar fashion to redirecting _stdin_ you can redirect _stdout_, too. Unlike how _stdin_ has the _<_ symbol, _stdout_ supports two symbols: _>_ and _>>_. _>_ means to overwrite the file if it already exists, and _>>_ means to append to it if it already exists. If however the specified file does not exist, then it will create the file.
+		*newprog* > *output*		(this command will write the output of *newprog* to the file, *output*, overwriting it if it exists, creating it if it does not)
+		*newprog* >> *output*		(this command will append the output of *newprog* to the file, *output*, creating it if it does not exist)
+		
+PROGRAM ENVIRONMENT
+	Each process executed on a UNIX system (and most commonly on other operating systems too, including Windows), has a specified _environment_ tied to it. It is a list of key-value pairs (where key=value; _environment variables_), and contain many things that may or may not be useful to the running program. Such key-value pairs include the name of the user executing the program, the shell (or program) that launched it, and the home directory of the user. There are many more, too.
+	
+	*myshell* manages and takes care of three environment variables:
+		_SHELL_		contains the path to the *myshell* executable.
+		_PWD_		maintains the current working directory of the program.
+		_PARENT_	if a process is executed, then this variable is added to its environment, which informs the program what program it had launched from.
+		
+	To see all environment variables, you can run the _environ_ command from within *myshell*.
+	
+BACKGROUND EXECUTION:
+	If you like, you can execute programs into the background. What this means is that instead of a program blocking input from the shell until it's completed, it can rather run in the "background", hidden from the user, per se. This can be achieved by appending the _&_ character to the end of the command you enter into *myshell*. Unfortunately, there is no way to bring a program running in the background to the foreground with *myshell*.
